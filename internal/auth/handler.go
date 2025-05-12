@@ -1,20 +1,30 @@
 package auth
 
 import (
+	"app/finance/configs"
 	"fmt"
 	"net/http"
 )
 
-type AuthHandler struct{}
+type AuthHandler struct {
+	*configs.Config
+}
 
-func NewAuthHandler(router *http.ServeMux) {
-	handler := &AuthHandler{}
+type AuthHandlerDeps struct {
+	*configs.Config
+}
+
+func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
+	handler := &AuthHandler{
+		Config: deps.Config,
+	}
 	router.HandleFunc("POST /auth/login", handler.login())
 	router.HandleFunc("POST /auth/register", handler.register())
 }
 
 func (handler *AuthHandler) login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(handler.Config.Auth.Secret)
 		fmt.Println("login handler")
 	}
 }
