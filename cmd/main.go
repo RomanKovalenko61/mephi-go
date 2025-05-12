@@ -11,15 +11,20 @@ import (
 
 func main() {
 	conf := configs.LoadConfig()
-	_ = db.NewDb(conf)
+	db := db.NewDb(conf)
 
 	router := http.NewServeMux()
+
+	//Repositories
+	accountReposotory := account.NewAccountRepository(db)
 
 	// Handler
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config: conf,
 	})
-	account.NewAuthHandler(router, account.AccountHandlerDeps{})
+	account.NewAuthHandler(router, account.AccountHandlerDeps{
+		AccountRepository: accountReposotory,
+	})
 
 	server := http.Server{
 		Addr:    ":8081",

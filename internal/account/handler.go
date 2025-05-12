@@ -1,16 +1,24 @@
 package account
 
 import (
+	"app/finance/pkg/request"
+	"app/finance/pkg/resp"
 	"fmt"
 	"net/http"
 )
 
-type AccountHandler struct{}
+type AccountHandler struct {
+	AccountRepository *AccountRepository
+}
 
-type AccountHandlerDeps struct{}
+type AccountHandlerDeps struct {
+	AccountRepository *AccountRepository
+}
 
 func NewAuthHandler(router *http.ServeMux, deps AccountHandlerDeps) {
-	handler := &AccountHandler{}
+	handler := &AccountHandler{
+		AccountRepository: deps.AccountRepository,
+	}
 	router.HandleFunc("POST /account", handler.create())
 	router.HandleFunc("GET /account/{id}", handler.read())
 	router.HandleFunc("PATCH /account/{id}", handler.update())
@@ -20,6 +28,18 @@ func NewAuthHandler(router *http.ServeMux, deps AccountHandlerDeps) {
 func (handler *AccountHandler) create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Create account handler")
+		body, err := request.HandleBody[AccountCreateRequest](r)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		account := NewAccount(body.Owner)
+		createdAcc, err := handler.AccountRepository.Create(account)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		resp.ResponseJson(w, createdAcc, http.StatusCreated)
 	}
 }
 
