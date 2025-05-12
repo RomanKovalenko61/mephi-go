@@ -2,12 +2,10 @@ package auth
 
 import (
 	"app/finance/configs"
+	"app/finance/pkg/request"
 	"app/finance/pkg/resp"
-	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/go-playground/validator/v10"
 )
 
 type AuthHandler struct {
@@ -30,19 +28,12 @@ func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
 func (handler *AuthHandler) login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("login handler")
-		var payload LoginRequest
-		err := json.NewDecoder(r.Body).Decode(&payload)
+		body, err := request.HandleBody[LoginRequest](r)
 		if err != nil {
 			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		validate := validator.New()
-		err = validate.Struct(payload)
-		if err != nil {
-			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		fmt.Println("Payload: ", payload)
+		fmt.Println("Payload: ", body)
 		data := LoginResponse{
 			TOKEN: "123",
 		}
@@ -53,5 +44,15 @@ func (handler *AuthHandler) login() http.HandlerFunc {
 func (handler *AuthHandler) register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("registrer handler")
+		body, err := request.HandleBody[RegisterRequest](r)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fmt.Println("Payload: ", body)
+		data := RegisterResponse{
+			TOKEN: "123",
+		}
+		resp.ResponseJson(w, data, http.StatusOK)
 	}
 }
