@@ -1,13 +1,16 @@
 package main
 
 import (
+	"app/finance/configs"
+	"app/finance/internal/hello"
 	"fmt"
 	"net/http"
 )
 
 func main() {
+	conf := configs.LoadConfig()
 	router := http.NewServeMux()
-	NewHelloHandler(router)
+	hello.NewHelloHandler(router)
 
 	server := http.Server{
 		Addr:    ":8081",
