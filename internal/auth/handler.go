@@ -2,6 +2,7 @@ package auth
 
 import (
 	"app/finance/configs"
+	"app/finance/pkg/resp"
 	"fmt"
 	"net/http"
 )
@@ -26,6 +27,10 @@ func (handler *AuthHandler) login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(handler.Config.Auth.Secret)
 		fmt.Println("login handler")
+		data := LoginResponse{
+			TOKEN: "123",
+		}
+		resp.ResponseJson(w, data, http.StatusOK)
 	}
 }
 
