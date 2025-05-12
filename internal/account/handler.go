@@ -56,7 +56,7 @@ func (handler *AccountHandler) read() http.HandlerFunc {
 			resp.ResponseJson(w, msg, http.StatusBadRequest)
 			return
 		}
-		acc, err := handler.AccountRepository.GetById(id)
+		acc, err := handler.AccountRepository.GetById(uint(id))
 		if err != nil {
 			msg := fmt.Sprintf("Not Found Account with id: %v", id)
 			resp.ResponseJson(w, msg, http.StatusNotFound)
@@ -98,7 +98,23 @@ func (handler *AccountHandler) update() http.HandlerFunc {
 func (handler *AccountHandler) delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Delete account handler")
-		id := r.PathValue("id")
-		fmt.Println("ID: ", id)
+		idString := r.PathValue("id")
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			msg := fmt.Sprintf("id: %v isn't number", idString)
+			resp.ResponseJson(w, msg, http.StatusBadRequest)
+			return
+		}
+		_, err = handler.AccountRepository.GetById(uint(id))
+		if err != nil {
+			resp.ResponseJson(w, "Wrong id", http.StatusNotFound)
+			return
+		}
+		err = handler.AccountRepository.Delete(uint(id))
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		resp.ResponseJson(w, "Success deleted", http.StatusOK)
 	}
 }

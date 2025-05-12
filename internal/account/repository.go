@@ -24,7 +24,7 @@ func (repo *AccountRepository) Create(acc *Account) (*Account, error) {
 	return acc, nil
 }
 
-func (repo *AccountRepository) GetById(id int) (*Account, error) {
+func (repo *AccountRepository) GetById(id uint) (*Account, error) {
 	var acc Account
 	result := repo.Database.DB.Table("accounts").First(&acc, "id = ?", id)
 	if result.Error != nil {
@@ -39,4 +39,12 @@ func (repo *AccountRepository) Update(acc *Account) (*Account, error) {
 		return nil, result.Error
 	}
 	return acc, nil
+}
+
+func (repo *AccountRepository) Delete(id uint) error {
+	result := repo.Database.DB.Table("accounts").Delete(&Account{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
