@@ -38,5 +38,7 @@ func (handler *AccountHandler) update() http.HandlerFunc {
 func (handler *AccountHandler) delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Delete account handler")
+		id := r.PathValue("id")
+		fmt.Println("ID: ", id)
 	}
 }
