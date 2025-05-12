@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type AuthHandler struct {
@@ -31,15 +33,13 @@ func (handler *AuthHandler) login() http.HandlerFunc {
 		var payload LoginRequest
 		err := json.NewDecoder(r.Body).Decode(&payload)
 		if err != nil {
-			resp.ResponseJson(w, err, http.StatusBadRequest)
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if payload.Email == "" {
-			resp.ResponseJson(w, "Email required", http.StatusBadRequest)
-			return
-		}
-		if payload.Password == "" {
-			resp.ResponseJson(w, "Password required", http.StatusBadRequest)
+		validate := validator.New()
+		err = validate.Struct(payload)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		fmt.Println("Payload: ", payload)
