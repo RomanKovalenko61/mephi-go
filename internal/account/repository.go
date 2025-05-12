@@ -19,3 +19,12 @@ func (repo *AccountRepository) Create(acc *Account) (*Account, error) {
 	}
 	return acc, nil
 }
+
+func (repo *AccountRepository) GetById(id int) (*Account, error) {
+	var acc Account
+	result := repo.Database.DB.Table("accounts").First(&acc, "id = ?", id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &acc, nil
+}

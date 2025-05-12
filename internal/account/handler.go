@@ -5,6 +5,7 @@ import (
 	"app/finance/pkg/resp"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type AccountHandler struct {
@@ -46,6 +47,20 @@ func (handler *AccountHandler) create() http.HandlerFunc {
 func (handler *AccountHandler) read() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Read account handler")
+		idString := r.PathValue("id")
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			msg := fmt.Sprintf("id: %v isn't number", idString)
+			resp.ResponseJson(w, msg, http.StatusBadRequest)
+			return
+		}
+		acc, err := handler.AccountRepository.GetById(id)
+		if err != nil {
+			msg := fmt.Sprintf("Not Found Account with id: %v", id)
+			resp.ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}
+		resp.ResponseJson(w, acc, http.StatusOK)
 	}
 }
 
