@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"gorm.io/gorm"
 )
 
 type AccountHandler struct {
@@ -67,6 +69,29 @@ func (handler *AccountHandler) read() http.HandlerFunc {
 func (handler *AccountHandler) update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Update account handler")
+		body, err := request.HandleBody[AccountUpdateRequest](r)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		idString := r.PathValue("id")
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			msg := fmt.Sprintf("id: %v isn't number", idString)
+			resp.ResponseJson(w, msg, http.StatusBadRequest)
+			return
+		}
+		acc, err := handler.AccountRepository.Update(&Account{
+			Model: gorm.Model{
+				ID: uint(id),
+			},
+			Balance: body.Balance,
+		})
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		resp.ResponseJson(w, acc, http.StatusOK)
 	}
 }
 

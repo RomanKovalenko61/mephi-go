@@ -1,6 +1,10 @@
 package account
 
-import "app/finance/pkg/db"
+import (
+	"app/finance/pkg/db"
+
+	"gorm.io/gorm/clause"
+)
 
 type AccountRepository struct {
 	Database *db.Db
@@ -27,4 +31,12 @@ func (repo *AccountRepository) GetById(id int) (*Account, error) {
 		return nil, result.Error
 	}
 	return &acc, nil
+}
+
+func (repo *AccountRepository) Update(acc *Account) (*Account, error) {
+	result := repo.Database.DB.Table("accounts").Clauses(clause.Returning{}).Updates(acc)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return acc, nil
 }
