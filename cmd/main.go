@@ -4,6 +4,7 @@ import (
 	"app/finance/configs"
 	"app/finance/internal/account"
 	"app/finance/internal/auth"
+	"app/finance/internal/user"
 	"app/finance/pkg/db"
 	"app/finance/pkg/middleware"
 	"fmt"
@@ -18,10 +19,15 @@ func main() {
 
 	//Repositories
 	accountReposotory := account.NewAccountRepository(db)
+	userRepository := user.NewUserRepository(db)
+
+	//Services
+	authService := auth.NewAuthService(userRepository)
 
 	// Handler
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
-		Config: conf,
+		Config:      conf,
+		AuthService: authService,
 	})
 	account.NewAuthHandler(router, account.AccountHandlerDeps{
 		AccountRepository: accountReposotory,
