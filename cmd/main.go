@@ -5,6 +5,7 @@ import (
 	"app/finance/internal/account"
 	"app/finance/internal/auth"
 	"app/finance/pkg/db"
+	"app/finance/pkg/middleware"
 	"fmt"
 	"net/http"
 )
@@ -28,7 +29,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    ":8081",
-		Handler: router,
+		Handler: middleware.Logging(router),
 	}
 
 	fmt.Println("Server is listening on port 8081")
