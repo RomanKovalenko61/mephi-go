@@ -2,6 +2,7 @@ package auth
 
 import (
 	"app/finance/configs"
+	"app/finance/pkg/jwt"
 	"app/finance/pkg/request"
 	"app/finance/pkg/resp"
 	"fmt"
@@ -37,13 +38,18 @@ func (handler *AuthHandler) login() http.HandlerFunc {
 			return
 		}
 		fmt.Println("Payload: ", body)
-		_, err = handler.AuthService.Login(body.Email, body.Password)
+		email, err := handler.AuthService.Login(body.Email, body.Password)
 		if err != nil {
-			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		token, err := jwt.NewJWT(handler.Auth.Secret).Create(email)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		data := LoginResponse{
-			TOKEN: "123",
+			TOKEN: token,
 		}
 		resp.ResponseJson(w, data, http.StatusOK)
 	}
@@ -58,13 +64,18 @@ func (handler *AuthHandler) register() http.HandlerFunc {
 			return
 		}
 		fmt.Println("Payload: ", body)
-		_, err = handler.AuthService.Register(body.Email, body.Password, body.Username)
+		email, err := handler.AuthService.Register(body.Email, body.Password, body.Username)
 		if err != nil {
-			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		token, err := jwt.NewJWT(handler.Auth.Secret).Create(email)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		data := RegisterResponse{
-			TOKEN: "123",
+			TOKEN: token,
 		}
 		resp.ResponseJson(w, data, http.StatusOK)
 	}
