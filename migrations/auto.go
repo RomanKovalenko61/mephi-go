@@ -2,6 +2,7 @@ package main
 
 import (
 	"app/finance/internal/account"
+	"app/finance/internal/user"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -18,5 +19,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&account.Account{})
+	db.AutoMigrate(&account.Account{}, &user.User{})
 }
