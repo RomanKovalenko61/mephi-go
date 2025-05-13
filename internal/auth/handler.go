@@ -37,6 +37,11 @@ func (handler *AuthHandler) login() http.HandlerFunc {
 			return
 		}
 		fmt.Println("Payload: ", body)
+		_, err = handler.AuthService.Login(body.Email, body.Password)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		data := LoginResponse{
 			TOKEN: "123",
 		}
@@ -53,7 +58,11 @@ func (handler *AuthHandler) register() http.HandlerFunc {
 			return
 		}
 		fmt.Println("Payload: ", body)
-		handler.AuthService.Register(body.Email, body.Password, body.Username)
+		_, err = handler.AuthService.Register(body.Email, body.Password, body.Username)
+		if err != nil {
+			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		data := RegisterResponse{
 			TOKEN: "123",
 		}
