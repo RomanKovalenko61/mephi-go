@@ -1,13 +1,19 @@
 package jwt
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type JWT struct {
 	Secret string
 }
 
 type JWTData struct {
-	Email string
+	Email     string
+	IssuedAt  int64
+	ExpiresAt int64
 }
 
 func NewJWT(secret string) *JWT {
@@ -18,7 +24,9 @@ func NewJWT(secret string) *JWT {
 
 func (j *JWT) Create(data JWTData) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": data.Email,
+		"email":     data.Email,
+		"issuedAt":  jwt.NewNumericDate(time.Now()),
+		"expiresAt": jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 	})
 	s, err := t.SignedString([]byte(j.Secret))
 	if err != nil {
@@ -31,7 +39,21 @@ func (j *JWT) Parse(token string) (bool, *JWTData) {
 	t, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		return []byte(j.Secret), nil
 	})
-	if err != nil {
+	if err != nil || !t.Valid {
+		return false, nil
+	}
+	expiresAtParsed, ok := t.Claims.(jwt.MapClaims)["expiresAt"]
+	if !ok {
+		return false, nil
+	}
+	expiresAtInt, ok := expiresAtParsed.(float64)
+	if !ok {
+		return false, nil
+	}
+	expiresAt := int64(expiresAtInt)
+	expirationTime := time.Unix(expiresAt, 0)
+	now := time.Now()
+	if now.After(expirationTime) {
 		return false, nil
 	}
 	email := t.Claims.(jwt.MapClaims)["email"]
