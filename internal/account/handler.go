@@ -1,6 +1,7 @@
 package account
 
 import (
+	"app/finance/configs"
 	"app/finance/pkg/middleware"
 	"app/finance/pkg/request"
 	"app/finance/pkg/resp"
@@ -17,16 +18,17 @@ type AccountHandler struct {
 
 type AccountHandlerDeps struct {
 	AccountRepository *AccountRepository
+	Config            *configs.Config
 }
 
 func NewAuthHandler(router *http.ServeMux, deps AccountHandlerDeps) {
 	handler := &AccountHandler{
 		AccountRepository: deps.AccountRepository,
 	}
-	router.Handle("POST /account", middleware.ISAuthed(handler.create()))
-	router.Handle("GET /account/{id}", middleware.ISAuthed(handler.read()))
-	router.Handle("PATCH /account/{id}", middleware.ISAuthed(handler.update()))
-	router.Handle("DELETE /account/{id}", middleware.ISAuthed(handler.delete()))
+	router.Handle("POST /account", middleware.ISAuthed(handler.create(), deps.Config))
+	router.Handle("GET /account/{id}", middleware.ISAuthed(handler.read(), deps.Config))
+	router.Handle("PATCH /account/{id}", middleware.ISAuthed(handler.update(), deps.Config))
+	router.Handle("DELETE /account/{id}", middleware.ISAuthed(handler.delete(), deps.Config))
 }
 
 func (handler *AccountHandler) create() http.HandlerFunc {
@@ -50,6 +52,9 @@ func (handler *AccountHandler) create() http.HandlerFunc {
 func (handler *AccountHandler) read() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Read account handler")
+		if email, ok := r.Context().Value(middleware.ContextEmailKey).(string); ok {
+			fmt.Println("Get Email from ctx: ", email)
+		}
 		idString := r.PathValue("id")
 		id, err := strconv.Atoi(idString)
 		if err != nil {

@@ -31,6 +31,7 @@ func main() {
 	})
 	account.NewAuthHandler(router, account.AccountHandlerDeps{
 		AccountRepository: accountReposotory,
+		Config:            conf,
 	})
 
 	//Middlewares

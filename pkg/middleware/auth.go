@@ -1,16 +1,34 @@
 package middleware
 
 import (
-	"fmt"
+	"app/finance/configs"
+	"app/finance/pkg/jwt"
+	"context"
 	"net/http"
 	"strings"
 )
 
-func ISAuthed(next http.Handler) http.Handler {
+type key string
+
+const (
+	ContextEmailKey key = "ContextEmailKey"
+)
+
+func ISAuthed(next http.Handler, config *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 		token := strings.TrimPrefix(authHeader, "Bearer ")
-		fmt.Println("Token: ", token)
-		next.ServeHTTP(w, r)
+		isValid, data := jwt.NewJWT(config.Auth.Secret).Parse(token)
+		if !isValid {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+		ctx := context.WithValue(r.Context(), ContextEmailKey, data.Email)
+		req := r.WithContext(ctx)
+		next.ServeHTTP(w, req)
 	})
 }
