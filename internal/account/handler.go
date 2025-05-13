@@ -1,6 +1,7 @@
 package account
 
 import (
+	"app/finance/pkg/middleware"
 	"app/finance/pkg/request"
 	"app/finance/pkg/resp"
 	"fmt"
@@ -22,10 +23,10 @@ func NewAuthHandler(router *http.ServeMux, deps AccountHandlerDeps) {
 	handler := &AccountHandler{
 		AccountRepository: deps.AccountRepository,
 	}
-	router.HandleFunc("POST /account", handler.create())
-	router.HandleFunc("GET /account/{id}", handler.read())
-	router.HandleFunc("PATCH /account/{id}", handler.update())
-	router.HandleFunc("DELETE /account/{id}", handler.delete())
+	router.Handle("POST /account", middleware.ISAuthed(handler.create()))
+	router.Handle("GET /account/{id}", middleware.ISAuthed(handler.read()))
+	router.Handle("PATCH /account/{id}", middleware.ISAuthed(handler.update()))
+	router.Handle("DELETE /account/{id}", middleware.ISAuthed(handler.delete()))
 }
 
 func (handler *AccountHandler) create() http.HandlerFunc {
