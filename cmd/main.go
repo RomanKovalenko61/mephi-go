@@ -18,7 +18,7 @@ func main() {
 	router := http.NewServeMux()
 
 	//Repositories
-	accountReposotory := account.NewAccountRepository(db)
+	accountRepository := account.NewAccountRepository(db)
 	userRepository := user.NewUserRepository(db)
 
 	//Services
@@ -30,7 +30,7 @@ func main() {
 		AuthService: authService,
 	})
 	account.NewAuthHandler(router, account.AccountHandlerDeps{
-		AccountRepository: accountReposotory,
+		AccountRepository: accountRepository,
 		Config:            conf,
 	})
 
