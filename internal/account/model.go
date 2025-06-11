@@ -7,6 +7,7 @@ import (
 
 type Account struct {
 	gorm.Model
+	UserId  uint      `json:"userId"`
 	Balance float64   `json:"balance"`
 	Owner   string    `json:"owner"`
 	Card    card.Card `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"card,omitempty"`

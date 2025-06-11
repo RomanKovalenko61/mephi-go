@@ -20,5 +20,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&account.Account{}, &user.User{}, &card.Card{})
+	_ = db.AutoMigrate(&user.User{}, &account.Account{}, &card.Card{})
 }
