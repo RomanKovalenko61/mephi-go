@@ -1,7 +1,7 @@
 package account
 
 type AccountCreateRequest struct {
-	Owner string `json:"owner" validate:"required"`
+	UserID uint `json:"userID" validate:"required"`
 }
 
 type AccountUpdateRequest struct {

@@ -7,14 +7,13 @@ import (
 
 type Account struct {
 	gorm.Model
-	UserId  uint      `json:"userId"`
+	UserID  uint      `json:"userId"`
 	Balance float64   `json:"balance"`
-	Owner   string    `json:"owner"`
 	Card    card.Card `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"card,omitempty"`
 }
 
-func NewAccount(owner string) *Account {
+func NewAccount(userID uint) *Account {
 	return &Account{
-		Owner: owner,
+		UserID: userID,
 	}
 }

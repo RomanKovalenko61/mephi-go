@@ -17,14 +17,14 @@ func NewAuthService(userRepository *user.UserRepository) *AuthService {
 	}
 }
 
-func (service *AuthService) Register(email, password, name string) (string, error) {
+func (service *AuthService) Register(email, password, name string) (uint, error) {
 	existedUser, _ := service.UserRepository.FindByEmail(email)
 	if existedUser != nil {
-		return "", errors.New(ErrUserExists)
+		return 0, errors.New(ErrUserExists)
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	user := &user.User{
 		Email:    email,
@@ -33,19 +33,19 @@ func (service *AuthService) Register(email, password, name string) (string, erro
 	}
 	_, err = service.UserRepository.Create(user)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-	return user.Email, nil
+	return user.ID, nil
 }
 
-func (service *AuthService) Login(email, password string) (string, error) {
-	existedUser, _ := service.UserRepository.FindByEmail(email)
+func (service *AuthService) Login(id uint, password string) (uint, error) {
+	existedUser, _ := service.UserRepository.FindById(id)
 	if existedUser == nil {
-		return "", errors.New(ErrWrongCredentials)
+		return 0, errors.New(ErrWrongCredentials)
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(existedUser.Password), []byte(password))
 	if err != nil {
-		return "", errors.New(ErrWrongCredentials)
+		return 0, errors.New(ErrWrongCredentials)
 	}
-	return existedUser.Email, nil
+	return existedUser.ID, nil
 }

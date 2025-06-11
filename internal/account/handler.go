@@ -39,7 +39,7 @@ func (handler *AccountHandler) create() http.HandlerFunc {
 			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		account := NewAccount(body.Owner)
+		account := NewAccount(body.UserID)
 		createdAcc, err := handler.AccountRepository.Create(account)
 		if err != nil {
 			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
@@ -52,19 +52,13 @@ func (handler *AccountHandler) create() http.HandlerFunc {
 func (handler *AccountHandler) read() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Read account handler")
-		if email, ok := r.Context().Value(middleware.ContextEmailKey).(string); ok {
-			fmt.Println("Get Email from ctx: ", email)
-		}
-		idString := r.PathValue("id")
-		id, err := strconv.Atoi(idString)
+		id, err := checkAccess(w, r)
 		if err != nil {
-			msg := fmt.Sprintf("id: %v isn't number", idString)
-			resp.ResponseJson(w, msg, http.StatusBadRequest)
 			return
 		}
-		acc, err := handler.AccountRepository.GetById(uint(id))
+		acc, err := handler.AccountRepository.GetById(id)
 		if err != nil {
-			msg := fmt.Sprintf("Not Found Account with id: %v", id)
+			msg := fmt.Sprintf("Аккаунт с id: %v не найден", id)
 			resp.ResponseJson(w, msg, http.StatusNotFound)
 			return
 		}
@@ -75,21 +69,18 @@ func (handler *AccountHandler) read() http.HandlerFunc {
 func (handler *AccountHandler) update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Update account handler")
+		id, err := checkAccess(w, r)
+		if err != nil {
+			return
+		}
 		body, err := request.HandleBody[AccountUpdateRequest](r)
 		if err != nil {
 			resp.ResponseJson(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		idString := r.PathValue("id")
-		id, err := strconv.Atoi(idString)
-		if err != nil {
-			msg := fmt.Sprintf("id: %v isn't number", idString)
-			resp.ResponseJson(w, msg, http.StatusBadRequest)
-			return
-		}
 		acc, err := handler.AccountRepository.Update(&Account{
 			Model: gorm.Model{
-				ID: uint(id),
+				ID: id,
 			},
 			Balance: body.Balance,
 		})
@@ -104,23 +95,45 @@ func (handler *AccountHandler) update() http.HandlerFunc {
 func (handler *AccountHandler) delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Delete account handler")
-		idString := r.PathValue("id")
-		id, err := strconv.Atoi(idString)
+		id, err := checkAccess(w, r)
 		if err != nil {
-			msg := fmt.Sprintf("id: %v isn't number", idString)
-			resp.ResponseJson(w, msg, http.StatusBadRequest)
 			return
 		}
-		_, err = handler.AccountRepository.GetById(uint(id))
+		_, err = handler.AccountRepository.GetById(id)
 		if err != nil {
 			resp.ResponseJson(w, "Wrong id", http.StatusNotFound)
 			return
 		}
-		err = handler.AccountRepository.Delete(uint(id))
+		err = handler.AccountRepository.Delete(id)
 		if err != nil {
 			resp.ResponseJson(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		resp.ResponseJson(w, "Success deleted", http.StatusOK)
 	}
+}
+
+func checkAccess(w http.ResponseWriter, r *http.Request) (uint, error) {
+	userID, ok := r.Context().Value(middleware.ContextIDKey).(uint)
+	if ok {
+		fmt.Println("Get ID from ctx: ", userID)
+	} else {
+		msg := "Не удалось получить ID пользователя из контекста"
+		resp.ResponseJson(w, msg, http.StatusInternalServerError)
+		return 0, fmt.Errorf(msg)
+	}
+	idString := r.PathValue("id")
+	idInt, err := strconv.Atoi(idString)
+	if err != nil {
+		msg := fmt.Sprintf("id: %v isn't number", idString)
+		resp.ResponseJson(w, msg, http.StatusBadRequest)
+		return 0, err
+	}
+	id := uint(idInt)
+	if id != userID {
+		msg := fmt.Sprintf("У вас недостаточно прав для доступа к аккаунту: %v", id)
+		resp.ResponseJson(w, msg, http.StatusForbidden)
+		return 0, fmt.Errorf("access denied for account %d", id)
+	}
+	return id, nil
 }

@@ -11,7 +11,7 @@ import (
 type key string
 
 const (
-	ContextEmailKey key = "ContextEmailKey"
+	ContextIDKey key = "ContextIDKey"
 )
 
 func ISAuthed(next http.Handler, config *configs.Config) http.Handler {
@@ -27,7 +27,7 @@ func ISAuthed(next http.Handler, config *configs.Config) http.Handler {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
-		ctx := context.WithValue(r.Context(), ContextEmailKey, data.Email)
+		ctx := context.WithValue(r.Context(), ContextIDKey, data.UserID)
 		req := r.WithContext(ctx)
 		next.ServeHTTP(w, req)
 	})

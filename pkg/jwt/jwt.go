@@ -11,7 +11,7 @@ type JWT struct {
 }
 
 type JWTData struct {
-	Email     string
+	UserID    uint
 	IssuedAt  int64
 	ExpiresAt int64
 }
@@ -24,7 +24,7 @@ func NewJWT(secret string) *JWT {
 
 func (j *JWT) Create(data JWTData) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":     data.Email,
+		"userID":    data.UserID,
 		"issuedAt":  jwt.NewNumericDate(time.Now()),
 		"expiresAt": jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 	})
@@ -56,8 +56,8 @@ func (j *JWT) Parse(token string) (bool, *JWTData) {
 	if now.After(expirationTime) {
 		return false, nil
 	}
-	email := t.Claims.(jwt.MapClaims)["email"]
+	userID := t.Claims.(jwt.MapClaims)["userID"]
 	return t.Valid, &JWTData{
-		Email: email.(string),
+		UserID: uint(userID.(float64)),
 	}
 }
