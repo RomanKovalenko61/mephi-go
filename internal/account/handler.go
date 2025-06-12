@@ -98,7 +98,6 @@ func (handler *AccountHandler) delete() http.HandlerFunc {
 
 func (handler *AccountHandler) getAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Get all accounts handler")
 		id, err := getIDFromContext(w, r)
 		if err != nil {
 			return
@@ -114,9 +113,7 @@ func (handler *AccountHandler) getAll() http.HandlerFunc {
 
 func getIDFromContext(w http.ResponseWriter, r *http.Request) (uint, error) {
 	userID, ok := r.Context().Value(middleware.ContextIDKey).(uint)
-	if ok {
-		fmt.Println("Get ID from ctx: ", userID)
-	} else {
+	if !ok {
 		msg := "Не удалось получить ID пользователя из контекста"
 		resp.ResponseJson(w, msg, http.StatusInternalServerError)
 		return 0, fmt.Errorf(msg)
