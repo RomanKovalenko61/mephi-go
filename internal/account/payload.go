@@ -5,5 +5,5 @@ type AccountCreateRequest struct {
 }
 
 type AccountUpdateRequest struct {
-	Balance float64 `json:"balance" validate:"required"`
+	Balance float64 `json:"balance"`
 }

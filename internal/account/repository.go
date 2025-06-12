@@ -34,7 +34,11 @@ func (repo *AccountRepository) GetById(id uint) (*Account, error) {
 }
 
 func (repo *AccountRepository) Update(acc *Account) (*Account, error) {
-	result := repo.Database.DB.Table("accounts").Clauses(clause.Returning{}).Updates(acc)
+	result := repo.Database.DB.Model(&acc).Table("accounts").
+		Clauses(clause.Returning{}).
+		Omit(clause.Associations).
+		Updates(map[string]interface{}{"balance": acc.Balance})
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -47,4 +51,13 @@ func (repo *AccountRepository) Delete(id uint) error {
 		return result.Error
 	}
 	return nil
+}
+
+func (repo *AccountRepository) GetAll(id uint) ([]Account, error) {
+	var accounts []Account
+	result := repo.Database.DB.Table("accounts").Where("user_id = ?", id).Find(&accounts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return accounts, nil
 }

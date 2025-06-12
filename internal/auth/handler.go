@@ -38,7 +38,7 @@ func (handler *AuthHandler) login() http.HandlerFunc {
 			return
 		}
 		fmt.Println("Payload: ", body)
-		id, err := handler.AuthService.Login(body.ID, body.Password)
+		id, err := handler.AuthService.Login(body.Email, body.Password)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

@@ -38,8 +38,8 @@ func (service *AuthService) Register(email, password, name string) (uint, error)
 	return user.ID, nil
 }
 
-func (service *AuthService) Login(id uint, password string) (uint, error) {
-	existedUser, _ := service.UserRepository.FindById(id)
+func (service *AuthService) Login(email, password string) (uint, error) {
+	existedUser, _ := service.UserRepository.FindByEmail(email)
 	if existedUser == nil {
 		return 0, errors.New(ErrWrongCredentials)
 	}

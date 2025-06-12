@@ -10,5 +10,5 @@ type User struct {
 	Email    string `gorm:"index"`
 	Password string
 	Name     string
-	Accounts []account.Account `gorm:"foreignkey:UserId"`
+	Accounts []account.Account `gorm:"foreignKey:UserID"`
 }
