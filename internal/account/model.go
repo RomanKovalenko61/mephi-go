@@ -7,9 +7,9 @@ import (
 
 type Account struct {
 	gorm.Model
-	UserID  uint      `json:"userId"`
-	Balance float64   `json:"balance"`
-	Card    card.Card `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"card,omitempty"`
+	UserID  uint        `json:"userId"`
+	Balance float64     `json:"balance"`
+	Cards   []card.Card `gorm:"foreignKey:AccountID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
 }
 
 func NewAccount(userID uint) *Account {

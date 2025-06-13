@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Db   DbConfig
-	Auth AuthConfig
+	Db     DbConfig
+	Auth   AuthConfig
+	Crypto CryptoConfig
 }
 
 type DbConfig struct {
@@ -17,6 +18,10 @@ type DbConfig struct {
 }
 
 type AuthConfig struct {
+	Secret string
+}
+
+type CryptoConfig struct {
 	Secret string
 }
 
@@ -31,6 +36,9 @@ func LoadConfig() *Config {
 		},
 		Auth: AuthConfig{
 			Secret: os.Getenv("TOKEN"),
+		},
+		Crypto: CryptoConfig{
+			Secret: os.Getenv("CRYPTO_KEY"),
 		},
 	}
 }

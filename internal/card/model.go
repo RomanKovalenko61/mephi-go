@@ -1,12 +1,15 @@
 package card
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Card struct {
 	gorm.Model
-	AccountId uint `json:"accountId"`
-	UserId    uint `json:"userId"`
-	NumberEnc string
-	ExpireEnc string
-	HMAC      string
+	AccountID uint   `json:"accountId" gorm:"foreignKey:AccountID;references:ID"`
+	UserID    uint   `json:"userId" gorm:"foreignKey:UserID;references:ID"`
+	NumberEnc string `json:"numberEnc"`
+	ExpireEnc string `json:"expireEnc"`
+	CVV       string `json:"cvv"`
+	HMAC      string `json:"hmac"`
 }

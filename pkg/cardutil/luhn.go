@@ -56,3 +56,12 @@ func CheckCardNumber(cardNumber string) bool {
 	}
 	return sum%10 == 0
 }
+
+func GenerateCVV() string {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	var b strings.Builder
+	for i := 0; i < 3; i++ {
+		b.WriteString(strconv.Itoa(rnd.Intn(10)))
+	}
+	return b.String()
+}

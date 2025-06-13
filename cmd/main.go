@@ -4,7 +4,9 @@ import (
 	"app/finance/configs"
 	"app/finance/internal/account"
 	"app/finance/internal/auth"
+	"app/finance/internal/card"
 	"app/finance/internal/user"
+	"app/finance/pkg/crypto"
 	"app/finance/pkg/db"
 	"app/finance/pkg/middleware"
 	"fmt"
@@ -17,9 +19,13 @@ func main() {
 
 	router := http.NewServeMux()
 
+	//Helper
+	cryptoHelper := crypto.NewCryptoHelper(conf.Crypto.Secret)
+
 	//Repositories
 	accountRepository := account.NewAccountRepository(db)
 	userRepository := user.NewUserRepository(db)
+	cardRepository := card.NewCardRepository(db)
 
 	//Services
 	authService := auth.NewAuthService(userRepository)
@@ -32,6 +38,10 @@ func main() {
 	account.NewAuthHandler(router, account.AccountHandlerDeps{
 		AccountRepository: accountRepository,
 		Config:            conf,
+		CardService: card.NewCardService(card.CardServiceDeps{
+			CardRepository: cardRepository,
+			CryptoHelper:   cryptoHelper,
+		}),
 	})
 
 	//Middlewares
