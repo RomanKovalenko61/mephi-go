@@ -81,7 +81,6 @@ func (service *CardService) GetCardById(userID uint, cardID uint) (*Card, error)
 		HMAC:      existedCard.HMAC,
 		CVV:       cvv,
 	}
-	// TODO: Расшифровать номер карты и дату истечения
 	return encryptCard, nil
 }
 
