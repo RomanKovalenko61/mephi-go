@@ -3,6 +3,7 @@ package credit
 import (
 	"app/finance/internal/account"
 	"app/finance/internal/payment"
+	"app/finance/pkg/centralbank"
 	"app/finance/pkg/db"
 	"fmt"
 	"gorm.io/gorm"
@@ -21,7 +22,10 @@ func NewCreditRepository(database *db.Db) *CreditRepository {
 }
 
 func (repo *CreditRepository) create(accountId, userID uint, amount float64, duration uint) (*Credit, error) {
-	rate := 12.0 // TODO: get from cbr
+	rate, err := centralbank.GetCentralBankRate()
+	if err != nil {
+		return nil, fmt.Errorf("не удалось получить данные от ЦБ РФ: %v", err)
+	}
 	monthlyInterest := rate / 100 / 12
 	n := float64(duration)
 	r := monthlyInterest
@@ -57,7 +61,7 @@ func (repo *CreditRepository) create(accountId, userID uint, amount float64, dur
 		return nil, result.Error
 	}
 
-	err := repo.Database.DB.Transaction(func(tx *gorm.DB) error {
+	err = repo.Database.DB.Transaction(func(tx *gorm.DB) error {
 		for i := range payments {
 			payments[i].ID = 0
 			payments[i].CreditID = newCredit.ID
