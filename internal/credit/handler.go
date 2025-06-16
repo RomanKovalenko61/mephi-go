@@ -33,7 +33,12 @@ func (handler *CreditHandler) create() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		credit, err := handler.CreditRepository.create(body.AccountID, body.UserID, body.Amount, body.Duration)
+		userID, err := getIDFromContext(w, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		credit, err := handler.CreditRepository.create(body.AccountID, userID, body.Amount, body.Duration)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -54,4 +59,14 @@ func (handler *CreditHandler) create() http.HandlerFunc {
 		}
 		resp.ResponseJson(w, response, http.StatusCreated)
 	}
+}
+
+func getIDFromContext(w http.ResponseWriter, r *http.Request) (uint, error) {
+	userID, ok := r.Context().Value(middleware.ContextIDKey).(uint)
+	if !ok {
+		msg := "не удалось получить ID пользователя из контекста"
+		resp.ResponseJson(w, msg, http.StatusInternalServerError)
+		return 0, fmt.Errorf(msg)
+	}
+	return userID, nil
 }

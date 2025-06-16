@@ -22,6 +22,15 @@ func NewCreditRepository(database *db.Db) *CreditRepository {
 }
 
 func (repo *CreditRepository) create(accountId, userID uint, amount float64, duration uint) (*Credit, error) {
+	var acc account.Account
+	result := repo.Database.DB.Table("accounts").First(&acc, accountId)
+	if result.Error != nil {
+		return nil, fmt.Errorf("аккаунт с id: %v не найден", accountId)
+	}
+	if acc.UserID != userID {
+		return nil, fmt.Errorf("аккаунт с id: %d не принадлежит вам", accountId)
+	}
+
 	rate, err := centralbank.GetCentralBankRate()
 	if err != nil {
 		return nil, fmt.Errorf("не удалось получить данные от ЦБ РФ: %v", err)
@@ -48,14 +57,6 @@ func (repo *CreditRepository) create(accountId, userID uint, amount float64, dur
 		Duration:  duration,
 	}
 
-	var acc account.Account
-	result := repo.Database.DB.Table("accounts").First(&acc, accountId)
-	if result.Error != nil {
-		return nil, fmt.Errorf("account not found: %v", accountId)
-	}
-	if acc.UserID != userID {
-		return nil, fmt.Errorf("account %d does not belong to user %d", accountId, userID)
-	}
 	result = repo.Database.DB.Create(&newCredit)
 	if result.Error != nil {
 		return nil, result.Error
