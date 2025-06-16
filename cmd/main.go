@@ -5,6 +5,7 @@ import (
 	"app/finance/internal/account"
 	"app/finance/internal/auth"
 	"app/finance/internal/card"
+	"app/finance/internal/credit"
 	"app/finance/internal/transaction"
 	"app/finance/internal/user"
 	"app/finance/pkg/crypto"
@@ -28,6 +29,7 @@ func main() {
 	userRepository := user.NewUserRepository(db)
 	cardRepository := card.NewCardRepository(db)
 	transactionRepository := transaction.NewTransactionRepository(db)
+	creditRepository := credit.NewCreditRepository(db)
 
 	//Services
 	authService := auth.NewAuthService(userRepository)
@@ -48,6 +50,10 @@ func main() {
 	transaction.NewTransactionHandler(router, transaction.TransactionHandlerDeps{
 		TransactionRepository: transactionRepository,
 		Config:                conf,
+	})
+	credit.NewCreditHandler(router, credit.CreditHandlerDeps{
+		CreditRepository: creditRepository,
+		Config:           conf,
 	})
 
 	//Middlewares
