@@ -3,6 +3,7 @@ package main
 import (
 	"app/finance/internal/account"
 	"app/finance/internal/card"
+	"app/finance/internal/transaction"
 	"app/finance/internal/user"
 	"os"
 
@@ -20,5 +21,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_ = db.AutoMigrate(&user.User{}, &account.Account{}, &card.Card{})
+	_ = db.AutoMigrate(&user.User{}, &account.Account{}, &card.Card{}, &transaction.Transaction{})
 }
