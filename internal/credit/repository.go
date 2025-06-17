@@ -79,3 +79,12 @@ func (repo *CreditRepository) create(accountId, userID uint, amount float64, dur
 	newCredit.Payments = payments
 	return newCredit, nil
 }
+
+func (repo *CreditRepository) GetById(id uint) (*Credit, error) {
+	var credit Credit
+	result := repo.Database.DB.Table("credits").Preload("Payments").First(&credit, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &credit, nil
+}
